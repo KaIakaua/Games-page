@@ -1,6 +1,7 @@
 // components/Filters.jsx
 import React, { useState } from "react";
-import { groupedPlatforms } from "../../data/data"; // Importa los datos agrupados
+import { groupedPlatforms } from "../../data/data";
+import "./Filters.css";
 
 const Filters = ({
   filters,
@@ -15,12 +16,24 @@ const Filters = ({
     platforms: false,
   });
 
+  // Estado para manejar la búsqueda dentro de las listas
+  const [searchTerms, setSearchTerms] = useState({
+    genre: "",
+    platforms: "",
+  });
+
   // Manejar el toggle del menú desplegable
   const toggleDropdown = (filterName) => {
-    setShowDropdowns((prev) => ({
-      ...prev,
-      [filterName]: !prev[filterName],
-    }));
+    setShowDropdowns((prev) => {
+      const newState = { genre: false, platforms: false }; // Cerrar todas las listas
+      newState[filterName] = !prev[filterName]; // Abrir solo la lista seleccionada
+      return newState;
+    });
+
+    // Limpiar el término de búsqueda si se cierra la lista
+    if (showDropdowns[filterName]) {
+      setSearchTerms((prev) => ({ ...prev, [filterName]: "" }));
+    }
   };
 
   // Manejar cambios en los checkboxes
@@ -44,6 +57,14 @@ const Filters = ({
       value: [],
       mode: "none",
     });
+    setSearchTerms((prev) => ({ ...prev, [filterName]: "" })); // Limpiar también el término de búsqueda
+  };
+
+  // Filtrar opciones según el término de búsqueda
+  const filterOptions = (options, searchTerm) => {
+    return options.filter((option) =>
+      option.toLowerCase().includes(searchTerm.toLowerCase())
+    );
   };
 
   return (
@@ -51,12 +72,12 @@ const Filters = ({
       {/* Encabezado */}
       <div className="gb-filters__header">
         <h3>Filtrar Resultados</h3>
-        <button onClick={onClearFilters} className="clear-filters">
+        <button onClick={onClearFilters} className="clear-filters-global">
           Limpiar Todos los Filtros
         </button>
       </div>
 
-      {/* Campo de búsqueda */}
+      {/* Campo de búsqueda global */}
       <input
         type="text"
         placeholder="Buscar juegos..."
@@ -82,38 +103,47 @@ const Filters = ({
           </button>
           {showDropdowns.genre && (
             <ul className="gb-filters__dropdown">
-              {availableOptions.genres.map((genre) => (
-                <li key={genre}>
-                  <label className="block w400">
-                    <input
-                      type="checkbox"
-                      value={genre}
-                      checked={filters.genre.value.includes(genre)}
-                      onChange={() => handleCheckboxChange("genre", genre)}
-                    />
-                    {genre
-                      .split("-")
-                      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-                      .join(" ")}
-                  </label>
-                </li>
-              ))}
-              <li className="gb-filters__actions">
+              {/* Header con barra de búsqueda y botón */}
+              <li className="gb-filters__header">
+                <input
+                  type="text"
+                  placeholder="Buscar géneros..."
+                  value={searchTerms.genre}
+                  onChange={(e) =>
+                    setSearchTerms((prev) => ({
+                      ...prev,
+                      genre: e.target.value,
+                    }))
+                  }
+                  className="search-input"
+                />
                 <button
-                  className="gb-btn gb-btn--ghost p0"
-                  type="button"
+                  className="clear-filters-header"
                   onClick={() => clearSpecificFilters("genre")}
                 >
-                  Limpiar
-                </button>
-                <button
-                  type="button"
-                  className="gb-btn gb-btn--ghost p0 hide-on-mobile"
-                  onClick={() => setShowDropdowns({ ...showDropdowns, genre: false })}
-                >
-                  Guardar
+                  Limpiar Filtros
                 </button>
               </li>
+
+              {/* Lista de géneros filtrada */}
+              {filterOptions(availableOptions.genres, searchTerms.genre).map(
+                (genre) => (
+                  <li key={genre}>
+                    <label className="block w400">
+                      <input
+                        type="checkbox"
+                        value={genre}
+                        checked={filters.genre.value.includes(genre)}
+                        onChange={() => handleCheckboxChange("genre", genre)}
+                      />
+                      {genre
+                        .split("-")
+                        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                        .join(" ")}
+                    </label>
+                  </li>
+                )
+              )}
             </ul>
           )}
         </div>
@@ -133,35 +163,52 @@ const Filters = ({
           </button>
           {showDropdowns.platforms && (
             <ul className="gb-filters__dropdown">
-              {groupedPlatforms.map((platform) => (
-                <li key={platform.value}>
-                  <label className="block w400">
-                    <input
-                      type="checkbox"
-                      value={platform.value}
-                      checked={filters.platforms.value.includes(platform.value)}
-                      onChange={() => handleCheckboxChange("platforms", platform.value)}
-                    />
-                    {platform.label}
-                  </label>
-                </li>
-              ))}
-              <li className="gb-filters__actions">
+              {/* Header con barra de búsqueda y botón */}
+              <li className="gb-filters__header">
+                <input
+                  type="text"
+                  placeholder="Buscar plataformas..."
+                  value={searchTerms.platforms}
+                  onChange={(e) =>
+                    setSearchTerms((prev) => ({
+                      ...prev,
+                      platforms: e.target.value,
+                    }))
+                  }
+                  className="search-input"
+                />
                 <button
-                  className="gb-btn gb-btn--ghost p0"
-                  type="button"
+                  className="clear-filters-header"
                   onClick={() => clearSpecificFilters("platforms")}
                 >
-                  Limpiar
-                </button>
-                <button
-                  type="button"
-                  className="gb-btn gb-btn--ghost p0 hide-on-mobile"
-                  onClick={() => setShowDropdowns({ ...showDropdowns, platforms: false })}
-                >
-                  Guardar
+                  Limpiar Filtros
                 </button>
               </li>
+
+              {/* Lista de plataformas filtrada */}
+              {filterOptions(
+                groupedPlatforms.map((platform) => platform.label),
+                searchTerms.platforms
+              ).map((platformLabel) => {
+                const platform = groupedPlatforms.find(
+                  (p) => p.label === platformLabel
+                );
+                return (
+                  <li key={platform.value}>
+                    <label className="block w400">
+                      <input
+                        type="checkbox"
+                        value={platform.value}
+                        checked={filters.platforms.value.includes(platform.value)}
+                        onChange={() =>
+                          handleCheckboxChange("platforms", platform.value)
+                        }
+                      />
+                      {platform.label}
+                    </label>
+                  </li>
+                );
+              })}
             </ul>
           )}
         </div>

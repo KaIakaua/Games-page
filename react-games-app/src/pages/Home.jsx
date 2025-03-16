@@ -4,6 +4,7 @@ import axios from "axios";
 import Filters from "../components/Filters/Filters";
 import SearchBar from "../components/SearchBar/SearchBar";
 import GameCard from "../components/GameCard/GameCard";
+import "./Home.css";
 
 const Home = () => {
     const [games, setGames] = useState([]);
@@ -11,20 +12,17 @@ const Home = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [searchQuery, setSearchQuery] = useState("");
   
-    // Estado para los filtros seleccionados
     const [filters, setFilters] = useState({
-      year: { value: "", mode: "none" }, // Año sigue siendo un solo valor
-      genre: { value: [], mode: "include" }, // Géneros permiten múltiples selecciones
-      platforms: { value: [], mode: "include" }, // Plataformas permiten múltiples selecciones
+      year: { value: "", mode: "none" },
+      genre: { value: [], mode: "include" },
+      platforms: { value: [], mode: "include" }, 
     });
   
-    // Estado para las opciones disponibles
     const [availableOptions, setAvailableOptions] = useState({
       genres: [],
       platforms: [],
     });
   
-    // Manejar cambios en los filtros
     const handleFilterChange = (filterName, newValue) => {
       setFilters((prevFilters) => ({
         ...prevFilters,
@@ -32,7 +30,6 @@ const Home = () => {
       }));
     };
   
-    // Obtener juegos basados en los filtros actuales
     useEffect(() => {
       const fetchGames = async () => {
         try {
@@ -44,7 +41,6 @@ const Home = () => {
             search: searchQuery || undefined,
           };
   
-          // Aplicar filtros solo si están activos
           if (filters.year.mode === "include") {
             params.dates = `${filters.year.value}-01-01,${filters.year.value}-12-31`;
           }
@@ -68,7 +64,6 @@ const Home = () => {
       fetchGames();
     }, [currentPage, filters, searchQuery]);
   
-    // Actualizar opciones disponibles cuando cambian los filtros
     useEffect(() => {
       const fetchAvailableOptions = async () => {
         try {
@@ -93,7 +88,6 @@ const Home = () => {
       fetchAvailableOptions();
     }, []);
   
-    // Función para limpiar filtros
     const clearFilters = () => {
       setFilters({
         year: { value: "", mode: "none" },
@@ -108,7 +102,6 @@ const Home = () => {
   
     return (
       <div>
-        {/* Componente de Filtros */}
         <Filters
           filters={filters}
           availableOptions={availableOptions}
@@ -118,7 +111,6 @@ const Home = () => {
           onClearFilters={clearFilters}
         />
   
-        {/* Lista de Juegos */}
         <h1>Top Games by Metacritic</h1>
         <ul className="game-list">
           {games.length > 0 ? (
@@ -132,7 +124,6 @@ const Home = () => {
           )}
         </ul>
   
-        {/* Paginación */}
         <div>
           <button
             onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
