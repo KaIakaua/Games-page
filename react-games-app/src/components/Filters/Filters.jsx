@@ -19,7 +19,6 @@ const Filters = ({
   const [searchTerms, setSearchTerms] = useState({
     genre: "",
     platforms: "",
-    year: "",
   });
 
   // Manejar el toggle del menú desplegable
@@ -213,7 +212,7 @@ const Filters = ({
         </div>
 
         {/* Filtro por año */}
-        <div className="gb-filters__section">
+        <div className="gb-filters__section year-filter-section"> {/* Clase específica */}
           <button
             className="gb-filters__toggle gb-btn"
             type="button"
@@ -279,7 +278,7 @@ const Filters = ({
                     onFilterChange("year", { value: "", mode: "none" }); // Limpiar año individual si se selecciona un rango
                   }}
                 />
-                <span>a</span>
+                <span> a </span>
                 <input
                   type="number"
                   placeholder="Año final"
