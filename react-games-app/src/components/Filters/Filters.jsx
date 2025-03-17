@@ -1,4 +1,3 @@
-// components/Filters.jsx
 import React, { useState } from "react";
 import { groupedPlatforms } from "../../data/data";
 import "./Filters.css";
@@ -14,23 +13,23 @@ const Filters = ({
   const [showDropdowns, setShowDropdowns] = useState({
     genre: false,
     platforms: false,
+    year: false,
   });
 
-  // Estado para manejar la búsqueda dentro de las listas
   const [searchTerms, setSearchTerms] = useState({
     genre: "",
     platforms: "",
+    year: "",
   });
 
   // Manejar el toggle del menú desplegable
   const toggleDropdown = (filterName) => {
     setShowDropdowns((prev) => {
-      const newState = { genre: false, platforms: false }; // Cerrar todas las listas
-      newState[filterName] = !prev[filterName]; // Abrir solo la lista seleccionada
+      const newState = { genre: false, platforms: false, year: false };
+      newState[filterName] = !prev[filterName];
       return newState;
     });
 
-    // Limpiar el término de búsqueda si se cierra la lista
     if (showDropdowns[filterName]) {
       setSearchTerms((prev) => ({ ...prev, [filterName]: "" }));
     }
@@ -57,7 +56,7 @@ const Filters = ({
       value: [],
       mode: "none",
     });
-    setSearchTerms((prev) => ({ ...prev, [filterName]: "" })); // Limpiar también el término de búsqueda
+    setSearchTerms((prev) => ({ ...prev, [filterName]: "" }));
   };
 
   // Filtrar opciones según el término de búsqueda
@@ -209,6 +208,92 @@ const Filters = ({
                   </li>
                 );
               })}
+            </ul>
+          )}
+        </div>
+
+        {/* Filtro por año */}
+        <div className="gb-filters__section">
+          <button
+            className="gb-filters__toggle gb-btn"
+            type="button"
+            onClick={() => toggleDropdown("year")}
+          >
+            Año:{" "}
+            {filters.year.value
+              ? `${filters.year.value}`
+              : filters.yearRange.start && filters.yearRange.end
+              ? `${filters.yearRange.start} - ${filters.yearRange.end}`
+              : "Sin año seleccionado"}
+            <i className="fa fa-caret-down ml-2 transition"></i>
+          </button>
+          {showDropdowns.year && (
+            <ul className="gb-filters__dropdown">
+              {/* Header con botón "Limpiar Filtros" */}
+              <li className="gb-filters__header">
+                <button
+                  className="clear-filters-header"
+                  onClick={() => {
+                    onFilterChange("year", { value: "", mode: "none" });
+                    onFilterChange("yearRange", { start: "", end: "" });
+                  }}
+                >
+                  Limpiar Filtros
+                </button>
+              </li>
+
+              {/* Lista de años individuales */}
+              <li>
+                <select
+                  value={filters.year.value}
+                  onChange={(e) => {
+                    const selectedYear = e.target.value;
+                    onFilterChange("year", { value: selectedYear, mode: "include" });
+                    onFilterChange("yearRange", { start: "", end: "" }); // Limpiar rango si se selecciona un año individual
+                  }}
+                >
+                  <option value="">Todos los años</option>
+                  {Array.from(
+                    { length: new Date().getFullYear() - 1969 },
+                    (_, i) => 1970 + i
+                  ).map((year) => (
+                    <option key={year} value={year}>
+                      {year}
+                    </option>
+                  ))}
+                </select>
+              </li>
+
+              {/* Rango de años */}
+              <li className="year-range">
+                <input
+                  type="number"
+                  placeholder="Año inicial"
+                  value={filters.yearRange.start || ""}
+                  onChange={(e) => {
+                    const startYear = e.target.value;
+                    onFilterChange("yearRange", {
+                      ...filters.yearRange,
+                      start: startYear,
+                    });
+                    onFilterChange("year", { value: "", mode: "none" }); // Limpiar año individual si se selecciona un rango
+                  }}
+                />
+                <span>a</span>
+                <input
+                  type="number"
+                  placeholder="Año final"
+                  value={filters.yearRange.end || ""}
+                  onChange={(e) => {
+                    const endYear = e.target.value;
+                    onFilterChange("yearRange", {
+                      ...filters.yearRange,
+                      end: endYear,
+                    });
+                    onFilterChange("year", { value: "", mode: "none" }); // Limpiar año individual si se selecciona un rango
+                  }}
+                />
+              </li>
             </ul>
           )}
         </div>
