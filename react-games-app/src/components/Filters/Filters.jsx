@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { groupedPlatforms } from "../../data/data";
 import "./Filters.css";
 
 const Filters = ({
@@ -14,17 +13,41 @@ const Filters = ({
     genre: false,
     platforms: false,
     year: false,
+    tags: false,
+    developers: false,
   });
 
   const [searchTerms, setSearchTerms] = useState({
     genre: "",
     platforms: "",
+    tags: "",
+    developers: "",
   });
+
+  // Tags proporcionados por tu compañero
+  const tagsFromColleague = [
+    "Singleplayer",
+    "Steam Achievements",
+    "Multiplayer",
+    "Full controller support",
+    "Steam Cloud",
+    "Atmospheric",
+    "steam-trading-cards",
+    "Great Soundtrack",
+    "RPG",
+    "Co-op",
+  ];
 
   // Manejar el toggle del menú desplegable
   const toggleDropdown = (filterName) => {
     setShowDropdowns((prev) => {
-      const newState = { genre: false, platforms: false, year: false };
+      const newState = {
+        genre: false,
+        platforms: false,
+        year: false,
+        tags: false,
+        developers: false,
+      };
       newState[filterName] = !prev[filterName];
       return newState;
     });
@@ -45,6 +68,16 @@ const Filters = ({
       ...filters[filterName],
       value: newValues,
       mode: newValues.length > 0 ? "include" : "none",
+    });
+  };
+
+  // Manejar cambios en el input de desarrollador
+  const handleDeveloperChange = (e) => {
+    const developerName = e.target.value;
+    onFilterChange("developers", {
+      ...filters.developers,
+      value: developerName ? [developerName] : [], // Solo permite un desarrollador
+      mode: developerName ? "include" : "none",
     });
   };
 
@@ -134,10 +167,7 @@ const Filters = ({
                         checked={filters.genre.value.includes(genre)}
                         onChange={() => handleCheckboxChange("genre", genre)}
                       />
-                      {genre
-                        .split("-")
-                        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-                        .join(" ")}
+                      {genre}
                     </label>
                   </li>
                 )
@@ -185,10 +215,10 @@ const Filters = ({
 
               {/* Lista de plataformas filtrada */}
               {filterOptions(
-                groupedPlatforms.map((platform) => platform.label),
+                availableOptions.platforms.map((platform) => platform.label),
                 searchTerms.platforms
               ).map((platformLabel) => {
-                const platform = groupedPlatforms.find(
+                const platform = availableOptions.platforms.find(
                   (p) => p.label === platformLabel
                 );
                 return (
@@ -212,7 +242,7 @@ const Filters = ({
         </div>
 
         {/* Filtro por año */}
-        <div className="gb-filters__section year-filter-section"> {/* Clase específica */}
+        <div className="gb-filters__section">
           <button
             className="gb-filters__toggle gb-btn"
             type="button"
@@ -291,6 +321,99 @@ const Filters = ({
                     });
                     onFilterChange("year", { value: "", mode: "none" }); // Limpiar año individual si se selecciona un rango
                   }}
+                />
+              </li>
+            </ul>
+          )}
+        </div>
+
+        {/* Filtro por tags */}
+        <div className="gb-filters__section">
+          <button
+            className="gb-filters__toggle gb-btn"
+            type="button"
+            onClick={() => toggleDropdown("tags")}
+          >
+            Tags:{" "}
+            {filters.tags.value.length > 0
+              ? `${filters.tags.value.length} seleccionados`
+              : "Sin tags seleccionados"}
+            <i className="fa fa-caret-down ml-2 transition"></i>
+          </button>
+          {showDropdowns.tags && (
+            <ul className="gb-filters__dropdown">
+              {/* Header con barra de búsqueda y botón */}
+              <li className="gb-filters__header">
+                <input
+                  type="text"
+                  placeholder="Buscar tags..."
+                  value={searchTerms.tags}
+                  onChange={(e) =>
+                    setSearchTerms((prev) => ({
+                      ...prev,
+                      tags: e.target.value,
+                    }))
+                  }
+                  className="search-input"
+                />
+                <button
+                  className="clear-filters-header"
+                  onClick={() => clearSpecificFilters("tags")}
+                >
+                  Limpiar Filtros
+                </button>
+              </li>
+
+              {/* Lista de tags filtrada */}
+              {filterOptions(tagsFromColleague, searchTerms.tags).map((tag) => (
+                <li key={tag}>
+                  <label className="block w400">
+                    <input
+                      type="checkbox"
+                      value={tag}
+                      checked={filters.tags.value.includes(tag)}
+                      onChange={() => handleCheckboxChange("tags", tag)}
+                    />
+                    {tag}
+                  </label>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        {/* Filtro por empresa desarrolladora */}
+        <div className="gb-filters__section">
+          <button
+            className="gb-filters__toggle gb-btn"
+            type="button"
+            onClick={() => toggleDropdown("developers")}
+          >
+            Empresa:{" "}
+            {filters.developers.value.length > 0
+              ? `${filters.developers.value[0]}` // Mostrar el desarrollador seleccionado
+              : "Sin empresa seleccionada"}
+            <i className="fa fa-caret-down ml-2 transition"></i>
+          </button>
+          {showDropdowns.developers && (
+            <ul className="gb-filters__dropdown">
+              {/* Header con botón "Limpiar Filtros" */}
+              <li className="gb-filters__header">
+                <button
+                  className="clear-filters-header"
+                  onClick={() => clearSpecificFilters("developers")}
+                >
+                  Limpiar Filtros
+                </button>
+              </li>
+
+              {/* Input de texto para el desarrollador */}
+              <li>
+                <input
+                  type="text"
+                  placeholder="Nombre del desarrollador"
+                  value={filters.developers.value[0] || ""}
+                  onChange={handleDeveloperChange}
                 />
               </li>
             </ul>

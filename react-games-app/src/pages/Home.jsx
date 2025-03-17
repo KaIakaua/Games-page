@@ -92,12 +92,12 @@ const Home = () => {
           ]);
 
         setAvailableOptions({
-          genres: genresResponse.data.results.map((genre) => genre.slug),
+          genres: genresResponse.data.results.map((genre) => genre.name),
           platforms: platformsResponse.data.results.map((platform) => ({
             value: platform.id,
             label: platform.name,
           })),
-          tags: tagsResponse.data.results.map((tag) => tag.slug),
+          tags: tagsResponse.data.results.map((tag) => tag.name),
           developers: developersResponse.data.results.map((developer) => developer.slug),
         });
       } catch (error) {
